@@ -2,29 +2,30 @@ version: "3.1"
 
 stories:
 
-- story: happy path
+- story: Iniciar el formulario para construir CV
   steps:
-  - intent: greet
-  - action: utter_greet
-  - intent: mood_great
-  - action: utter_happy
+  - intent: build_cv  # Esto responde a la pregunta de 'rules.yml'
+  - action: cv_form
+  - active_loop: cv_form
 
-- story: sad path 1
+- story: Iniciar el formulario para modificar CV
   steps:
-  - intent: greet
-  - action: utter_greet
-  - intent: mood_unhappy
-  - action: utter_cheer_up
-  - action: utter_did_that_help
-  - intent: affirm
-  - action: utter_happy
+  - intent: modify_cv # Esto responde a la pregunta de 'rules.yml'
+  - action: cv_form
+  - active_loop: cv_form
 
-- story: sad path 2
+- story: El usuario quiere agregar el telefono
   steps:
-  - intent: greet
-  - action: utter_greet
-  - intent: mood_unhappy
-  - action: utter_cheer_up
-  - action: utter_did_that_help
-  - intent: deny
-  - action: utter_goodbye
+  - intent: affirm_phone # El usuario dice "Si"
+  - action: utter_ask_phone_number # El bot pregunta el número
+  
+- story: El usuario NO quiere agregar el telefono
+  steps:
+  - intent: deny_phone # El usuario dice "No"
+  - action: utter_ask_email # El bot salta a la siguiente pregunta (ej. email)
+
+- story: Formulario completado y enviado
+  steps:
+  - action: cv_form            # La historia comienza cuando el formulario está activo
+  - active_loop: null         # El formulario se desactiva (termina)
+  - action: utter_submit_cv_form # El bot da un mensaje de confirmación

@@ -1,0 +1,170 @@
+version: "3.1"
+
+intents:
+  - build_cv:  # El usuario quiere armar un CV
+      use_entities: false
+  - modify_cv: # El usuario quiere modificar uno
+      use_entities: false
+  - affirm_phone: # El usuario SÍ quiere agregar teléfono
+      use_entities: false
+  - deny_phone: # El usuario NO quiere agregar teléfono
+      use_entities: false
+  # ... (tus intenciones existentes como greet, deny, affirm, etc.)
+
+slots:
+  # Datos a recolectar
+  full_name:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: from_text
+  birth_date:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: from_text
+  city:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: from_text
+  timezone:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: from_text
+  email:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: from_text
+  
+  # Slots para las preguntas condicionales
+  wants_phone:
+    type: bool
+    influence_conversation: false
+    mappings:
+    - type: custom
+  phone_number:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: from_text
+  wants_linkedin:
+    type: bool
+    influence_conversation: false
+    mappings:
+    - type: custom
+  linkedin_profile:
+    type: text
+    influence_conversation: false
+    mappings:
+    - type: from_text
+  
+  # Slots para la parte de "Modificar CV"
+  education_level:
+    type: categorical
+    values:
+      - sec_incompleto
+      - sec_completo
+      - curs_grado
+      - curs_terciario
+      - grad_grado
+      - grad_terciario
+      - posgrado
+    mappings:
+    - type: from_intent
+      intent: inform
+      value: "valor_del_boton" # Esto lo manejaremos en el form
+
+responses:
+  # --- Respuestas del Flujo "Armar CV" ---
+  utter_ask_initial_choice:
+  - text: "¡Hola! Soy tu asistente de CV. ¿Qué deseas hacer?"
+    buttons:
+    - title: "Armar un CV desde cero"
+      payload: /build_cv
+    - title: "Ya tengo un CV"
+      payload: /modify_cv
+
+  # Estas son las preguntas que el FORM usará
+  utter_ask_full_name:
+  - text: "¡Perfecto! Comencemos. ¿Cuál es tu nombre completo?"
+  
+  utter_ask_birth_date:
+  - text: "¿Cuál es tu fecha de nacimiento? (Ej. 15/03/1990)"
+  
+  utter_ask_city:
+  - text: "¿En qué ciudad resides actualmente?"
+  
+  utter_ask_timezone:
+  - text: "¿Cuál es tu zona horaria? (Ej. GMT-3)"
+  
+  utter_ask_email:
+  - text: "Necesitaré tu email para que las empresas te contacten."
+  
+  utter_ask_wants_phone:
+  - text: "¿Quieres agregar un número de teléfono de contacto?"
+    buttons:
+    - title: "Sí"
+      payload: /affirm_phone
+    - title: "No"
+      payload: /deny_phone
+
+  utter_ask_phone_number:
+  - text: "Entendido. ¿Cuál es tu número de teléfono?"
+
+  utter_ask_wants_linkedin:
+  - text: "¿Quieres agregar tu perfil de LinkedIn?"
+    buttons:
+    - title: "Sí"
+      payload: /affirm
+    - title: "No"
+      payload: /deny
+
+  utter_ask_linkedin_profile:
+  - text: "Genial, ¿cuál es la URL de tu perfil de LinkedIn?"
+
+  # --- Respuestas del Flujo "Modificar CV" ---
+  utter_ask_education_level:
+  - text: "Hablemos de tu educación. ¿Cuál es tu nivel máximo alcanzado?"
+    buttons:
+    - title: "Secundario incompleto"
+      payload: '/inform{"education_level": "sec_incompleto"}'
+    - title: "Secundario completo"
+      payload: '/inform{"education_level": "sec_completo"}'
+    - title: "Cursando carrera de grado"
+      payload: '/inform{"education_level": "curs_grado"}'
+    - title: "Cursando terciario"
+      payload: '/inform{"education_level": "curs_terciario"}'
+    - title: "Graduado carrera"
+      payload: '/inform{"education_level": "grad_grado"}'
+    - title: "Graduado Terciario"
+      payload: '/inform{"education_level": "grad_terciario"}'
+    - title: "Posgrado"
+      payload: '/inform{"education_level": "posgrado"}'
+
+  utter_ask_soft_skills:
+  - text: "Hablemos de habilidades blandas. (Aquí pondrías las opciones...)"
+    # ... (botones similares a los de educación)
+
+  utter_submit_cv_form:
+  - text: "¡Genial! Hemos completado tu información básica."
+
+# --- Declaración del Form ---
+forms:
+  cv_form:
+    required_slots:
+      - full_name
+      - birth_date
+      - city
+      - timezone
+      - email
+      - wants_phone
+      - wants_linkedin
+
+  # (Crearíamos otro form para 'modify_cv_form')
+
+# --- Declaración de Acciones ---
+actions:
+- validate_cv_form # Esta es la acción de Python que crearemos

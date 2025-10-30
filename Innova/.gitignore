@@ -1,0 +1,12 @@
+# Entorno virtual de Python
+.venv/
+
+# Modelos entrenados (se pueden regenerar)
+models/
+
+# Bases de datos de trackers
+*.db
+
+# Caché de Python
+__pycache__/
+*.pyc

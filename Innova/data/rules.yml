@@ -1,0 +1,7 @@
+version: "3.1"
+
+rules:
+- rule: Saludar al usuario y preguntar al iniciar la sesión
+  steps:
+  - action: action_session_start  # Esto es el "despertador"
+  - action: utter_ask_initial_choice  # La primera pregunta de tu flujo

@@ -1,0 +1,27 @@
+version: "3.1"
+
+nlu:
+- intent: build_cv
+  examples: |
+  - Quiero armar un CV desde cero
+  - Armar un CV
+  - Empecemos de cero
+  - no tengo cv
+
+- intent: modify_cv
+  examples: |
+  - Ya tengo un CV
+  - Quiero modificar mi CV
+  - Tengo un curriculum
+
+- intent: affirm_phone
+  examples: |
+  - Sí, quiero agregar mi teléfono
+  - Sí
+  - Dale
+
+- intent: deny_phone
+  examples: |
+  - No, gracias
+  - No
+  - Prefiero no agregarlo

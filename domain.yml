@@ -69,7 +69,7 @@ slots:
       - sec_completo
       - curs_grado
       - curs_terciario
-      - grad_grado
+      - grad_grados
       - grad_terciario
       - posgrado
     mappings:
