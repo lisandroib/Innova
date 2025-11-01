@@ -2,6 +2,7 @@ from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker, FormValidationAction
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.types import DomainDict
+import re  # <-- ¡Importante! Añade esta línea al inicio
 
 class ValidateCvForm(FormValidationAction):
     """Clase para validar el formulario de creación de CV."""
@@ -17,37 +18,28 @@ class ValidateCvForm(FormValidationAction):
         tracker: "Tracker",
         domain: "DomainDict",
     ) -> List[Text]:
-        """
-        Define los slots requeridos dinámicamente.
-        Aquí es donde manejamos la lógica condicional.
-        """
+        """Define los slots requeridos dinámicamente."""
         
-        # Inicia con la lista de slots que SIEMPRE se piden
         required = [
             "full_name",
             "birth_date",
             "city",
             "timezone",
             "email",
-            "wants_phone", # Siempre preguntamos si quiere teléfono
+            "wants_phone",
         ]
 
-        # Lógica condicional para el teléfono
         if tracker.get_slot("wants_phone") is True:
-            # Si el usuario dijo que SÍ, AÑADIMOS 'phone_number' a la lista
             required.append("phone_number")
 
-        # Siempre preguntamos si quiere LinkedIn *después* de lo del teléfono
         required.append("wants_linkedin")
 
-        # Lógica condicional para LinkedIn
         if tracker.get_slot("wants_linkedin") is True:
-            # Si el usuario dijo que SÍ, AÑADIMOS 'linkedin_profile'
             required.append("linkedin_profile")
 
         return required
 
-    # --- Validación de Slots (Opcional pero recomendado) ---
+    # --- Funciones de Validación de Slots ---
 
     def validate_wants_phone(
         self,
@@ -58,17 +50,16 @@ class ValidateCvForm(FormValidationAction):
     ) -> Dict[Text, Any]:
         """Valida la intención para 'wants_phone'."""
         
-        # Si el usuario dijo "Sí" (payload: /affirm_phone)
-        if tracker.latest_message['intent'].get('name') == 'affirm_phone':
+        intent = tracker.latest_message['intent'].get('name')
+        
+        if intent == 'affirm_phone' or intent == 'affirm':
             return {"wants_phone": True}
         
-        # Si el usuario dijo "No" (payload: /deny_phone)
-        if tracker.latest_message['intent'].get('name') == 'deny_phone':
+        if intent == 'deny_phone' or intent == 'deny':
             return {"wants_phone": False}
         
-        # Si escribió algo que no es un botón
         dispatcher.utter_message(text="Por favor, usa los botones 'Sí' o 'No'.")
-        return {"wants_phone": None} # Vuelve a preguntar
+        return {"wants_phone": None}
 
     def validate_wants_linkedin(
         self,
@@ -79,10 +70,12 @@ class ValidateCvForm(FormValidationAction):
     ) -> Dict[Text, Any]:
         """Valida la intención para 'wants_linkedin'."""
         
-        if tracker.latest_message['intent'].get('name') == 'affirm':
+        intent = tracker.latest_message['intent'].get('name')
+
+        if intent == 'affirm':
             return {"wants_linkedin": True}
         
-        if tracker.latest_message['intent'].get('name') == 'deny':
+        if intent == 'deny':
             return {"wants_linkedin": False}
         
         dispatcher.utter_message(text="Por favor, usa los botones 'Sí' o 'No'.")
@@ -97,15 +90,82 @@ class ValidateCvForm(FormValidationAction):
     ) -> Dict[Text, Any]:
         """Valida que el email tenga un formato básico."""
         
-        if "@" in slot_value and "." in slot_value:
-            # Formato simple OK
+        # --- CAMBIO: Regex más estricto ---
+        email_regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+        
+        if re.match(email_regex, slot_value):
             return {"email": slot_value}
         else:
-            # Formato inválido
             dispatcher.utter_message(text="Eso no parece un email válido. ¿Puedes intentarlo de nuevo? (Ej. tu@correo.com)")
-            return {"email": None} # Vuelve a preguntar por el email
+            return {"email": None}
 
-    # --- Envío del Formulario ---
+    # --- ¡NUEVO! Validadores para Texto Libre ---
+    # Estas funciones le dicen a Rasa que simplemente acepte el texto.
+    # -----------------------------------------------------------
+
+    def validate_full_name(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        """Simplemente acepta el texto para el nombre."""
+        return {"full_name": slot_value}
+
+    def validate_birth_date(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        """Simplemente acepta el texto para la fecha."""
+        # (Más adelante, podrías validar el formato "DD/MM/AAAA")
+        return {"birth_date": slot_value}
+
+    def validate_city(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        """Simplemente acepta el texto para la ciudad."""
+        return {"city": slot_value}
+
+    def validate_timezone(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        """Simplemente acepta el texto para la zona horaria."""
+        return {"timezone": slot_value}
+
+    def validate_phone_number(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        """Simplemente acepta el texto para el teléfono."""
+        # (Más adelante, podrías validar que solo sean números)
+        return {"phone_number": slot_value}
+
+    def validate_linkedin_profile(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        """Simplemente acepta el texto para linkedin."""
+        return {"linkedin_profile": slot_value}
+
+    # -----------------------------------------------------------
 
     def submit(
         self,
@@ -114,8 +174,6 @@ class ValidateCvForm(FormValidationAction):
         domain: DomainDict,
     ) -> List[Dict]:
         """Se llama cuando el formulario se completa."""
-        
-        # (Aquí es donde guardarías los datos en una Base de Datos)
         
         dispatcher.utter_message(response="utter_submit_cv_form")
         return []

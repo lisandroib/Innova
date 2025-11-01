@@ -1,0 +1,53 @@
+{
+  "text": {
+    "quiero": 15,
+    "armar": 2,
+    "un": 19,
+    "cv": 5,
+    "desde": 8,
+    "cero": 3,
+    "empecemos": 9,
+    "de": 7,
+    "no": 13,
+    "tengo": 18,
+    "ya": 20,
+    "modificar": 12,
+    "mi": 11,
+    "curriculum": 4,
+    "sí": 16,
+    "agregar": 0,
+    "teléfono": 17,
+    "dale": 6,
+    "gracias": 10,
+    "prefiero": 14,
+    "agregarlo": 1
+  },
+  "intent": {
+    "build_cv": 1,
+    "modify_cv": 3,
+    "affirm_phone": 0,
+    "deny_phone": 2
+  },
+  "response": null,
+  "action_name": {
+    "action_listen": 6,
+    "action_restart": 7,
+    "action_session_start": 9,
+    "action_default_fallback": 4,
+    "action_deactivate_loop": 1,
+    "action_revert_fallback_events": 8,
+    "action_default_ask_affirmation": 2,
+    "action_default_ask_rephrase": 3,
+    "action_two_stage_fallback": 10,
+    "action_unlikely_intent": 11,
+    "action_back": 0,
+    "action_extract_slots": 5,
+    "cv_form": 12,
+    "utter_ask_email": 13,
+    "utter_ask_initial_choice": 14,
+    "utter_ask_phone_number": 15,
+    "utter_submit_cv_form": 16
+  },
+  "action_text": null,
+  "intent_response_key": null
+}

@@ -2,30 +2,31 @@ version: "3.1"
 
 stories:
 
-- story: Iniciar el formulario para construir CV
+- story: Flujo para CONSTRUIR CV (Opción 2)
   steps:
-  - intent: build_cv  # Esto responde a la pregunta de 'rules.yml'
-  - action: cv_form
+  - intent: build_cv  # El usuario eligió "Queremos armar uno desde cero"
+  - action: cv_form      # El bot inicia el formulario de preguntas
   - active_loop: cv_form
 
-- story: Iniciar el formulario para modificar CV
+- story: Flujo para SUBIR CV (Opción 1)
   steps:
-  - intent: modify_cv # Esto responde a la pregunta de 'rules.yml'
-  - action: cv_form
-  - active_loop: cv_form
+  - intent: modify_cv # El usuario eligió "Si tenemos un cv"
+  - action: utter_ask_for_file_upload # El bot pide el archivo
+
+# --- (Las historias de tu formulario quedan igual) ---
 
 - story: El usuario quiere agregar el telefono
   steps:
-  - intent: affirm_phone # El usuario dice "Si"
-  - action: utter_ask_phone_number # El bot pregunta el número
+  - intent: affirm_phone
+  - action: utter_ask_phone_number
   
 - story: El usuario NO quiere agregar el telefono
   steps:
-  - intent: deny_phone # El usuario dice "No"
-  - action: utter_ask_email # El bot salta a la siguiente pregunta (ej. email)
+  - intent: deny_phone
+  - action: utter_ask_email # (Esto deberías cambiarlo por 'utter_ask_wants_linkedin' si ese es el siguiente paso)
 
 - story: Formulario completado y enviado
   steps:
-  - action: cv_form            # La historia comienza cuando el formulario está activo
-  - active_loop: null         # El formulario se desactiva (termina)
-  - action: utter_submit_cv_form # El bot da un mensaje de confirmación
+  - action: cv_form
+  - active_loop: null
+  - action: utter_submit_cv_form

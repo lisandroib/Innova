@@ -1,27 +1,60 @@
 version: "3.1"
 
 nlu:
-- intent: build_cv
-  examples: |
-    - Quiero armar un CV desde cero
-    - Armar un CV
-    - Empecemos de cero
-    - no tengo cv
+  - intent: build_cv
+    examples: |
+      - Quiero armar un CV desde cero
+      - Armar un CV
+      - Empecemos de cero
+      - no tengo cv
+      - Queremos armar uno desde cero
 
-- intent: modify_cv
-  examples: |
-    - Ya tengo un CV
-    - Quiero modificar mi CV
-    - Tengo un curriculum
+  - intent: modify_cv
+    examples: |
+      - Ya tengo un CV
+      - Quiero modificar mi CV
+      - Tengo un curriculum
+      - Si tenemos un cv
 
-- intent: affirm_phone
-  examples: |
-    - Sí, quiero agregar mi teléfono
-    - Sí
-    - Dale
+  - intent: affirm_phone
+    examples: |
+      - Sí, quiero agregar mi teléfono
+      - Sí
+      - Dale
+      - Por supuesto
+      - Agrégarlo
 
-- intent: deny_phone
-  examples: |
-    - No, gracias
-    - No
-    - Prefiero no agregarlo
+  - intent: deny_phone
+    examples: |
+      - No, gracias
+      - No
+      - Prefiero no agregarlo
+      - No, está bien así
+
+  - intent: inform
+    examples: |
+      - /inform{"education_level": "sec_incompleto"}
+      - /inform{"education_level": "sec_completo"}
+      - /inform{"education_level": "curs_grado"}
+      - /inform{"education_level": "curs_terciario"}
+      - /inform{"education_level": "grad_grado"}
+      - /inform{"education_level": "grad_terciario"}
+      - /inform{"education_level": "posgrado"}
+
+  - intent: affirm
+    examples: |
+      - Sí      - Sí
+      - claro
+      - si, por favor favor
+      - dalele
+      - bueno
+      - afirmativo
+
+  - intent: denyeny
+    examples: |
+      - No      - No
+      - no graciasas
+      - no, dejalo asialo asi
+      - para nadara nada
+      - negativo
+      - no quiero

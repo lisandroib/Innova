@@ -1,0 +1,66 @@
+{
+  "type": "MaxHistoryTrackerFeaturizer",
+  "state_featurizer": {
+    "action_texts": [],
+    "entity_tag_specs": [],
+    "feature_states": {
+      "intent": {
+        "affirm_phone": 0,
+        "back": 1,
+        "build_cv": 2,
+        "deny_phone": 3,
+        "modify_cv": 4,
+        "nlu_fallback": 5,
+        "out_of_scope": 6,
+        "restart": 7,
+        "session_start": 8
+      },
+      "action_name": {
+        "action_listen": 0,
+        "action_restart": 1,
+        "action_session_start": 2,
+        "action_default_fallback": 3,
+        "action_deactivate_loop": 4,
+        "action_revert_fallback_events": 5,
+        "action_default_ask_affirmation": 6,
+        "action_default_ask_rephrase": 7,
+        "action_two_stage_fallback": 8,
+        "action_unlikely_intent": 9,
+        "action_back": 10,
+        "...": 11,
+        "action_extract_slots": 12,
+        "validate_cv_form": 13,
+        "utter_ask_birth_date": 14,
+        "utter_ask_city": 15,
+        "utter_ask_education_level": 16,
+        "utter_ask_email": 17,
+        "utter_ask_full_name": 18,
+        "utter_ask_initial_choice": 19,
+        "utter_ask_linkedin_profile": 20,
+        "utter_ask_phone_number": 21,
+        "utter_ask_soft_skills": 22,
+        "utter_ask_timezone": 23,
+        "utter_ask_wants_linkedin": 24,
+        "utter_ask_wants_phone": 25,
+        "utter_submit_cv_form": 26,
+        "cv_form": 27
+      },
+      "entities": {},
+      "slots": {
+        "education_level_0": 0,
+        "education_level_1": 1,
+        "education_level_2": 2,
+        "education_level_3": 3,
+        "education_level_4": 4,
+        "education_level_5": 5,
+        "education_level_6": 6,
+        "education_level_7": 7
+      },
+      "active_loop": {
+        "cv_form": 0
+      }
+    }
+  },
+  "remove_duplicates": true,
+  "max_history": 5
+}
