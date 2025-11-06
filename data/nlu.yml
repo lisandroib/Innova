@@ -41,20 +41,42 @@ nlu:
       - /inform{"education_level": "grad_terciario"}
       - /inform{"education_level": "posgrado"}
 
+  - intent: greet
+    examples: |
+      - Hola
+      - Buenas
+      - Qué tal
+      - Holaa
+      - Buen día
+      - hey
+
   - intent: affirm
     examples: |
-      - Sí      - Sí
+      - Sí
       - claro
-      - si, por favor favor
-      - dalele
+      - si, por favor
+      - dale
       - bueno
       - afirmativo
 
-  - intent: denyeny
+  - intent: deny
     examples: |
-      - No      - No
-      - no graciasas
-      - no, dejalo asialo asi
-      - para nadara nada
+      - No
+      - no gracias
+      - no, dejalo asi
+      - para nada
       - negativo
       - no quiero
+
+  # --- ¡ESTO ES LO NUEVO Y MÁS IMPORTANTE! ---
+  # Le enseña al NLU lo que NO es un comando.
+  - intent: chitchat
+    examples: |
+      - lisandro ibarra
+      - 15 de marzo de 1990
+      - tucuman
+      - no se
+      - bla bla
+      - mi nombre es juan
+      - cualquier cosa que escriba
+      - el cielo es azul

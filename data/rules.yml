@@ -1,7 +1,22 @@
+# rules.yml (Versión Nueva - CORRECTA)
 version: "3.1"
 
 rules:
-- rule: Saludar al usuario y preguntar al iniciar la sesión
+- rule: Greeting on session start
+  conversation_start: true
   steps:
-  - action: action_session_start  # Esto es el "despertador"
-  - action: utter_ask_initial_choice  # La primera pregunta de tu flujo
+  - action: action_session_start
+  - action: utter_ask_initial_choice
+
+- rule: Greeting on explicit greet
+  steps:
+  - intent: greet
+  - action: utter_ask_initial_choice
+
+- rule: Manejar chitchat durante el cv_form
+  condition:
+  - active_loop: cv_form   # SI el formulario está activo
+  steps:
+  - intent: chitchat          # Y el usuario dice chitchat
+  - action: cv_form           # ENTONCES la única acción a tomar es "cv_form"
+  - active_loop: cv_form      # Y mantén el formulario activo

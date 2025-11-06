@@ -10,68 +10,41 @@ intents:
   - deny_phone:
       use_entities: false
   - inform
+  - greet
   - affirm # --- CAMBIO 1: AÑADIDO (necesario para LinkedIn)
   - deny # --- CAMBIO 1: AÑADIDO (necesario para LinkedIn)
+  - chitchat
 
 entities:
   - education_level
 
 slots:
-  # --- CAMBIO 2: AÑADIDOS "conditions" A TODOS LOS SLOTS "from_text" ---
-
   full_name:
     type: text
     influence_conversation: false
-    mappings:
-      - type: from_text
-        conditions:
-          - active_loop: cv_form
-        not_intent:
-          &base_not_intent # <-- Esto es un "ancla" de YAML para no repetir
-          - build_cv
-          - modify_cv
-          - affirm_phone
-          - deny_phone
-          - inform
-          - affirm
-          - deny
+    mappings: [] # <-- ¡ESTA ES LA CORRECCIÓN!
 
   birth_date:
     type: text
     influence_conversation: false
-    mappings:
-      - type: from_text
-        conditions:
-          - active_loop: cv_form
-        not_intent: *base_not_intent # <-- Reutiliza la lista
+    mappings: [] # <-- ¡ESTA ES LA CORRECCIÓN!
 
   city:
     type: text
     influence_conversation: false
-    mappings:
-      - type: from_text
-        conditions:
-          - active_loop: cv_form
-        not_intent: *base_not_intent
+    mappings: [] # <-- ¡ESTA ES LA CORRECCIÓN!
 
   timezone:
     type: text
     influence_conversation: false
-    mappings:
-      - type: from_text
-        conditions:
-          - active_loop: cv_form
-        not_intent: *base_not_intent
+    mappings: [] # <-- ¡ESTA ES LA CORRECCIÓN!
 
   email:
     type: text
     influence_conversation: false
-    mappings:
-      - type: from_text
-        conditions:
-          - active_loop: cv_form
-        not_intent: *base_not_intent
+    mappings: [] # <-- ¡ESTA ES LA CORRECCIÓN!
 
+  # --- ESTOS SE QUEDAN COMO ESTABAN ---
   wants_phone:
     type: bool
     influence_conversation: false
@@ -81,12 +54,9 @@ slots:
   phone_number:
     type: text
     influence_conversation: false
-    mappings:
-      - type: from_text
-        conditions:
-          - active_loop: cv_form
-        not_intent: *base_not_intent
+    mappings: [] # <-- ¡ESTA ES LA CORRECCIÓN!
 
+  # --- ESTE SE QUEDA COMO ESTABA ---
   wants_linkedin:
     type: bool
     influence_conversation: false
@@ -96,12 +66,9 @@ slots:
   linkedin_profile:
     type: text
     influence_conversation: false
-    mappings:
-      - type: from_text
-        conditions:
-          - active_loop: cv_form
-        not_intent: *base_not_intent
+    mappings: [] # <-- ¡ESTA ES LA CORRECCIÓN!
 
+  # --- ESTE SE QUEDA COMO ESTABA ---
   education_level:
     type: categorical
     values:
@@ -109,7 +76,7 @@ slots:
       - sec_completo
       - curs_grado
       - curs_terciario
-      - grad_grados # <-- (Ojo, creo que aquí quisiste poner "grad_grado")
+      - grad_grados
       - grad_terciario
       - posgrado
     mappings:
@@ -196,11 +163,15 @@ responses:
 # --- Declaración del Form ---
 forms:
   cv_form:
+    required_slots: []
+    ignored_intents: # <-- ¡AÑADE ESTAS LÍNEAS!
+      - chitchat
+      - greet
+      - inform
     # --- CAMBIO 3: ELIMINADA LA LISTA "required_slots" ---
     # Dejamos que "actions.py" (con la función required_slots)
     # controle esto al 100%.
     
-    required_slots: []
 
 session_config:
   session_expiration_time: 60
@@ -209,3 +180,4 @@ session_config:
 # --- Declaración de Acciones ---
 actions:
   - validate_cv_form
+  - action_session_start

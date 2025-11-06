@@ -2,7 +2,13 @@ from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker, FormValidationAction
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.types import DomainDict
-import re  # <-- ¡Importante! Añade esta línea al inicio
+import re
+# ¡Asegúrate de que estos imports estén al principio de tu archivo!
+from rasa_sdk.events import SessionStarted, ActionExecuted
+
+# Esta es nuestra "lista negra" de palabras que SON comandos
+# (a diferencia de los intents, que pueden ser erróneos)
+COMMAND_TEXT = ['sí', 'si', 'no', 'dale', 'claro', 'bueno', 'negar', 'parar']
 
 class ValidateCvForm(FormValidationAction):
     """Clase para validar el formulario de creación de CV."""
@@ -21,12 +27,8 @@ class ValidateCvForm(FormValidationAction):
         """Define los slots requeridos dinámicamente."""
         
         required = [
-            "full_name",
-            "birth_date",
-            "city",
-            "timezone",
-            "email",
-            "wants_phone",
+            "full_name", "birth_date", "city", "timezone",
+            "email", "wants_phone",
         ]
 
         if tracker.get_slot("wants_phone") is True:
@@ -39,141 +41,128 @@ class ValidateCvForm(FormValidationAction):
 
         return required
 
-    # --- Funciones de Validación de Slots ---
+    # --- NUEVA LÓGICA DE VALIDACIÓN ---
 
-    def validate_wants_phone(
+    def validate_text_slot(
         self,
         slot_value: Any,
         dispatcher: CollectingDispatcher,
         tracker: Tracker,
         domain: DomainDict,
+        slot_name: Text
     ) -> Dict[Text, Any]:
-        """Valida la intención para 'wants_phone'."""
-        
-        intent = tracker.latest_message['intent'].get('name')
-        
-        if intent == 'affirm_phone' or intent == 'affirm':
-            return {"wants_phone": True}
-        
-        if intent == 'deny_phone' or intent == 'deny':
-            return {"wants_phone": False}
-        
-        dispatcher.utter_message(text="Por favor, usa los botones 'Sí' o 'No'.")
-        return {"wants_phone": None}
+        """
+        Función genérica para validar texto.
+        Rechaza el texto SOLO si el texto parece un comando.
+        """
+        text = tracker.latest_message.get('text', '').lower()
 
-    def validate_wants_linkedin(
-        self,
-        slot_value: Any,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: DomainDict,
+        if text in COMMAND_TEXT:
+            # El usuario *realmente* escribió "sí" o "no"
+            dispatcher.utter_message(text=f"Por favor, ingresa un valor válido para {slot_name}.")
+            return {slot_name: None}
+        
+        # Si el texto NO es un comando (ej. "lisandro"),
+        # lo aceptamos, INCLUSO SI el NLU se confundió.
+        return {slot_name: slot_value}
+
+    def validate_full_name(
+        self, slot_value: Any, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict,
     ) -> Dict[Text, Any]:
-        """Valida la intención para 'wants_linkedin'."""
-        
-        intent = tracker.latest_message['intent'].get('name')
+        return self.validate_text_slot(slot_value, dispatcher, tracker, domain, "full_name")
 
-        if intent == 'affirm':
-            return {"wants_linkedin": True}
-        
-        if intent == 'deny':
-            return {"wants_linkedin": False}
-        
-        dispatcher.utter_message(text="Por favor, usa los botones 'Sí' o 'No'.")
-        return {"wants_linkedin": None}
+    def validate_birth_date(
+        self, slot_value: Any, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        return self.validate_text_slot(slot_value, dispatcher, tracker, domain, "birth_date")
+
+    def validate_city(
+        self, slot_value: Any, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        return self.validate_text_slot(slot_value, dispatcher, tracker, domain, "city")
+
+    def validate_timezone(
+        self, slot_value: Any, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        return self.validate_text_slot(slot_value, dispatcher, tracker, domain, "timezone")
+
+    def validate_phone_number(
+        self, slot_value: Any, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        return self.validate_text_slot(slot_value, dispatcher, tracker, domain, "phone_number")
+
+    def validate_linkedin_profile(
+        self, slot_value: Any, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict,
+    ) -> Dict[Text, Any]:
+        return self.validate_text_slot(slot_value, dispatcher, tracker, domain, "linkedin_profile")
+
+    # --- Validaciones de Lógica Especial ---
 
     def validate_email(
-        self,
-        slot_value: Any,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: DomainDict,
+        self, slot_value: Any, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict,
     ) -> Dict[Text, Any]:
         """Valida que el email tenga un formato básico."""
         
-        # --- CAMBIO: Regex más estricto ---
+        text = tracker.latest_message.get('text', '').lower()
+        if text in COMMAND_TEXT:
+            dispatcher.utter_message(text="Por favor, ingresa tu email.")
+            return {"email": None}
+
         email_regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
         
-        if re.match(email_regex, slot_value):
+        if re.match(email_regex, str(slot_value)):
             return {"email": slot_value}
         else:
             dispatcher.utter_message(text="Eso no parece un email válido. ¿Puedes intentarlo de nuevo? (Ej. tu@correo.com)")
             return {"email": None}
 
-    # --- ¡NUEVO! Validadores para Texto Libre ---
-    # Estas funciones le dicen a Rasa que simplemente acepte el texto.
-    # -----------------------------------------------------------
-
-    def validate_full_name(
-        self,
-        slot_value: Any,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: DomainDict,
+    def validate_wants_phone(
+        self, slot_value: Any, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict,
     ) -> Dict[Text, Any]:
-        """Simplemente acepta el texto para el nombre."""
-        return {"full_name": slot_value}
+        """Valida la intención para 'wants_phone'."""
+        intent = tracker.latest_message['intent'].get('name')
+        if intent == 'affirm_phone' or intent == 'affirm':
+            return {"wants_phone": True}
+        if intent == 'deny_phone' or intent == 'deny':
+            return {"wants_phone": False}
+        dispatcher.utter_message(text="Por favor, usa los botones 'Sí' o 'No'.")
+        return {"wants_phone": None}
 
-    def validate_birth_date(
-        self,
-        slot_value: Any,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: DomainDict,
+    def validate_wants_linkedin(
+        self, slot_value: Any, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict,
     ) -> Dict[Text, Any]:
-        """Simplemente acepta el texto para la fecha."""
-        # (Más adelante, podrías validar el formato "DD/MM/AAAA")
-        return {"birth_date": slot_value}
-
-    def validate_city(
-        self,
-        slot_value: Any,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: DomainDict,
-    ) -> Dict[Text, Any]:
-        """Simplemente acepta el texto para la ciudad."""
-        return {"city": slot_value}
-
-    def validate_timezone(
-        self,
-        slot_value: Any,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: DomainDict,
-    ) -> Dict[Text, Any]:
-        """Simplemente acepta el texto para la zona horaria."""
-        return {"timezone": slot_value}
-
-    def validate_phone_number(
-        self,
-        slot_value: Any,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: DomainDict,
-    ) -> Dict[Text, Any]:
-        """Simplemente acepta el texto para el teléfono."""
-        # (Más adelante, podrías validar que solo sean números)
-        return {"phone_number": slot_value}
-
-    def validate_linkedin_profile(
-        self,
-        slot_value: Any,
-        dispatcher: CollectingDispatcher,
-        tracker: Tracker,
-        domain: DomainDict,
-    ) -> Dict[Text, Any]:
-        """Simplemente acepta el texto para linkedin."""
-        return {"linkedin_profile": slot_value}
-
-    # -----------------------------------------------------------
+        """Valida la intención para 'wants_linkedin'."""
+        intent = tracker.latest_message['intent'].get('name')
+        if intent == 'affirm':
+            return {"wants_linkedin": True}
+        if intent == 'deny':
+            return {"wants_linkedin": False}
+        dispatcher.utter_message(text="Por favor, usa los botones 'Sí' o 'No'.")
+        return {"wants_linkedin": None}
 
     def submit(
+        self, dispatcher: CollectingDispatcher, tracker: Tracker, domain: DomainDict,
+    ) -> List[Dict]:
+        """Se llama cuando el formulario se completa."""
+        dispatcher.utter_message(response="utter_submit_cv_form")
+        return []
+
+# --- Esta es la clase que arregla tu saludo inicial ---
+class ActionSessionStart(Action):
+    """Sobrescribe la acción de inicio de sesión por defecto."""
+
+    def name(self) -> Text:
+        return "action_session_start"
+
+    async def run(
         self,
         dispatcher: CollectingDispatcher,
         tracker: Tracker,
         domain: DomainDict,
-    ) -> List[Dict]:
-        """Se llama cuando el formulario se completa."""
+    ) -> List[Dict[Text, Any]]:
         
-        dispatcher.utter_message(response="utter_submit_cv_form")
-        return []
+        events = [SessionStarted()]
+        dispatcher.utter_message(response="utter_ask_initial_choice")
+        events.append(ActionExecuted("action_listen"))
+
+        return events
